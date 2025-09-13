@@ -1,0 +1,39 @@
+package {{ .PkgName }}
+
+import ({{ range .Imports }}
+    "{{ . }}"
+{{ end }})
+
+// force the underlying to implement the interface
+var _ = {{ .Name }}(&{{ .Original }}{})
+
+type {{ .Name }}{{ .TypeParams }} interface {
+    {{- range .PrivateMethods }}
+    {{ . }}
+    {{- end }}
+    {{- range .PublicMethods }}
+    {{ . }}
+    {{- end }}
+}
+
+{{ if ne .MockName "" -}}
+// force the mock to implement the interface
+var _ = {{ .Name }}({{ .MockName }}{})
+
+type {{ .MockName }}{{ .TypeParams }} struct {
+    {{- range .PrivateMockFields }}
+    {{ . }}
+    {{- end }}
+    {{- range .PublicMockFields }}
+    {{ . }}
+    {{- end }}
+}
+
+{{- range .PrivateMockImplementations -}}
+{{ . }}
+{{- end -}}
+
+{{- range .PublicMockImplementations }}
+{{ . }}
+{{- end -}}
+{{- end -}}

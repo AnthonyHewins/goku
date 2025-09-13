@@ -13,9 +13,5 @@ var (
 
 type logger struct{ w io.Writer }
 
-func (l logger) err(s string)            { fmt.Fprint(l.w, red.Sprint(s)) }
+func (l logger) err(s string)            { fmt.Fprintln(l.w, red.Sprint(s)) }
 func (l logger) errf(s string, x ...any) { l.err(red.Sprintf(s, x...)) }
-
-func (l logger) method() {
-
-}
