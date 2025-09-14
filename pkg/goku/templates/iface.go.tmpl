@@ -1,8 +1,10 @@
 package {{ .PkgName }}
 
+{{ if .Imports -}}
 import ({{ range .Imports }}
     "{{ . }}"
 {{ end }})
+{{- end }}
 
 // force the underlying to implement the interface
 var _ = {{ .Name }}(&{{ .Original }}{})
@@ -28,12 +30,10 @@ type {{ .MockName }}{{ .TypeParams }} struct {
     {{ . }}
     {{- end }}
 }
-
-{{- range .PrivateMockImplementations -}}
+{{- range .PrivateMockImplementations }}
 {{ . }}
-{{- end -}}
-
-{{- range .PublicMockImplementations }}
+{{ end }}
+{{ range .PublicMockImplementations }}
 {{ . }}
-{{- end -}}
+{{ end }}
 {{- end -}}

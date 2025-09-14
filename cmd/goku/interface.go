@@ -12,8 +12,8 @@ import (
 type ifaceCmd struct {
 	goku.StructContract
 	dir       string
-	IfaceName string
-	GenMock   bool
+	ifaceName string
+	out       string
 }
 
 var iface = &ifaceCmd{
@@ -56,12 +56,28 @@ func (i *ifaceCmd) run(args argSlice) error {
 			}
 			opts = append(opts, goku.GenMock(mock))
 		case "-n", "--name":
-			if i.IfaceName = args.shift(); i.IfaceName == "" {
+			if i.ifaceName = args.shift(); i.ifaceName == "" {
 				return fmt.Errorf("missing argument for interface name")
+			}
+		case "-p", "--pkg":
+			p := args.shift()
+			if p == "" {
+				return fmt.Errorf("missing argument for package override flag")
+			}
+			opts = append(opts, goku.OverridePkg(p))
+		case "--private":
+			opts = append(opts, goku.IncludePrivate())
+		case "-o", "--out":
+			if i.out = args.shift(); i.out == "" {
+				return fmt.Errorf("must supply filename to output")
 			}
 		default:
 			return fmt.Errorf("unknown flag/option %s", flag)
 		}
+	}
+
+	if i.ifaceName == "" {
+		i.ifaceName = structName + "Interface"
 	}
 
 	entries, err := os.ReadDir(i.dir)
@@ -87,5 +103,15 @@ func (i *ifaceCmd) run(args argSlice) error {
 		return err
 	}
 
-	return s.GenInterface(os.Stdout, i.IfaceName, opts...)
+	w := os.Stdout
+	if i.out != "" {
+		f, err := os.Create(filepath.Join(i.dir, i.out))
+		if err != nil {
+			return err
+		}
+		w = f
+		defer f.Close()
+	}
+
+	return s.GenInterface(w, i.ifaceName, opts...)
 }
