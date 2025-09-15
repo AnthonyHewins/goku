@@ -1,0 +1,77 @@
+package override
+
+import (
+    "golang.org/x/exp/constraints"
+)
+
+// force the underlying to implement the interface
+var _ = TargetInterface(&Target{})
+
+type TargetInterface[X any] interface {
+    Noop()
+    OneArg(x int)
+    Return() error
+    ManyArg(x int, y int, o float32)
+    ArgReturn(x int, y int, o float32) (float64, int)
+    Generic(d X)
+    Maps(d map[string]X)
+    Complex(d map[string]map[int][]float64)
+    Import(d constraints.Complex)
+    Ellipses(d ...int)
+}
+
+// force the mock to implement the interface
+var _ = TargetInterface(Mock{})
+
+type Mock[X any] struct {
+    NoopFn func()
+    OneArgFn func(x int)
+    ReturnFn func() error
+    ManyArgFn func(x int, y int, o float32)
+    ArgReturnFn func(x int, y int, o float32) (float64, int)
+    GenericFn func(d X)
+    MapsFn func(d map[string]X)
+    ComplexFn func(d map[string]map[int][]float64)
+    ImportFn func(d constraints.Complex)
+    EllipsesFn func(d ...int)
+}
+
+func (mockImplementation Mock[X]) Noop() {
+	mockImplementation.NoopFn()
+}
+
+func (mockImplementation Mock[X]) OneArg(x int) {
+	mockImplementation.OneArgFn(x)
+}
+
+func (mockImplementation Mock[X]) Return() error {
+	return mockImplementation.ReturnFn()
+}
+
+func (mockImplementation Mock[X]) ManyArg(x int, y int, o float32) {
+	mockImplementation.ManyArgFn(x, y, o)
+}
+
+func (mockImplementation Mock[X]) ArgReturn(x int, y int, o float32) (float64, int) {
+	return mockImplementation.ArgReturnFn(x, y, o)
+}
+
+func (mockImplementation Mock[X]) Generic(d X) {
+	mockImplementation.GenericFn(d)
+}
+
+func (mockImplementation Mock[X]) Maps(d map[string]X) {
+	mockImplementation.MapsFn(d)
+}
+
+func (mockImplementation Mock[X]) Complex(d map[string]map[int][]float64) {
+	mockImplementation.ComplexFn(d)
+}
+
+func (mockImplementation Mock[X]) Import(d constraints.Complex) {
+	mockImplementation.ImportFn(d)
+}
+
+func (mockImplementation Mock[X]) Ellipses(d ...int) {
+	mockImplementation.EllipsesFn(d)
+}

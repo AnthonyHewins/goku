@@ -18,7 +18,7 @@ func TestGenInterface(t *testing.T) {
 			t.Fatalf("test file unreadable %s", err)
 		}
 
-		want, err := files.ReadFile(fmt.Sprintf("testdata/gen_interface/%d-expected.go", i))
+		want, err := files.ReadFile(fmt.Sprintf("testdata/gen_interface/%d-expected", i))
 		if err != nil {
 			t.Fatalf("test file unreadable %s", err)
 		}
@@ -41,11 +41,20 @@ func TestGenInterface(t *testing.T) {
 			continue
 		}
 
-		got := b.String()
-		if strings.TrimSpace(got) == strings.TrimSpace(string(want)) {
-			continue
+		got := strings.Split(strings.TrimSpace(b.String()), "\n")
+		wanted := strings.Split(strings.TrimSpace(string(want)), "\n")
+
+		if x, y := len(got), len(wanted); x != y {
+			t.Errorf("failed due to line count %d != %d, want\n%s\ngot\n%s", x, y, want, got)
+			return
 		}
 
-		t.Errorf("failed test, want\n%s\ngot\n%s", want, got)
+		for i, v := range wanted {
+			if strings.TrimSpace(v) == strings.TrimSpace(got[i]) {
+				continue
+			}
+
+			t.Errorf("failed at line %d:\n-%s\n+%s\n\nWant:%s\nGot:%s", i+1, v, got[i], strings.Join(wanted[:i+1], "\n"), strings.Join(got[:i+1], "\n"))
+		}
 	}
 }

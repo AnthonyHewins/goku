@@ -13,6 +13,7 @@ type ifaceCmd struct {
 	goku.StructContract
 	dir       string
 	ifaceName string
+	out       string
 }
 
 var iface = &ifaceCmd{dir: "."}
@@ -83,6 +84,10 @@ func (i *ifaceCmd) run(args argSlice) error {
 			opts = append(opts, goku.OverridePkg(p))
 		case "--private":
 			opts = append(opts, goku.IncludePrivate())
+		case "-o", "--out":
+			if i.out = args.shift(); i.out == "" {
+				return fmt.Errorf("missing arg for output file")
+			}
 		default:
 			return fmt.Errorf("unknown flag/option %s", flag)
 		}
@@ -115,5 +120,15 @@ func (i *ifaceCmd) run(args argSlice) error {
 		return err
 	}
 
-	return s.GenInterface(os.Stdout, i.ifaceName, opts...)
+	w := os.Stdout
+	if i.out != "" {
+		f, err := os.Create(i.out)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		w = f
+	}
+
+	return s.GenInterface(w, i.ifaceName, opts...)
 }

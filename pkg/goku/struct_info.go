@@ -104,15 +104,20 @@ func (i *iface) interfaceMethodStr(m *MethodInfo) string {
 
 func (i *iface) mockMethod(m *MethodInfo) string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("func (x %s%s) %s", i.MockName, i.TypeAliases, m.Name))
+	sb.WriteString(fmt.Sprintf("func (mockImplementation %s%s) %s", i.MockName, i.TypeAliases, m.Name))
 
 	sb.WriteString(i.tuple(m))
 
-	sb.WriteString(fmt.Sprintf(" {\n\treturn x.%sFn(", m.Name))
+	sb.WriteString(" {\n\t")
+	if len(m.Returns) > 0 {
+		sb.WriteString("return ")
+	}
+	sb.WriteString(fmt.Sprintf("mockImplementation.%sFn(", m.Name))
+
 	for idx, v := range m.Arguments {
 		sb.WriteString(v.Name)
 		if idx != len(m.Arguments)-1 {
-			sb.WriteRune(',')
+			sb.WriteString(", ")
 		}
 	}
 	sb.WriteString(")\n}")
@@ -130,12 +135,16 @@ func (i *iface) tuple(m *MethodInfo) string {
 	for idx, v := range m.Arguments {
 		sb.WriteString(v.String())
 		if idx != len(m.Arguments)-1 {
-			sb.WriteRune(',')
+			sb.WriteString(", ")
 		}
 	}
 	sb.WriteRune(')')
 
-	if len(m.Returns) > 0 {
+	switch len(m.Returns) {
+	case 0:
+	case 1:
+		sb.WriteString(fmt.Sprintf(" %s", m.Returns[0]))
+	default:
 		sb.WriteString(fmt.Sprintf(" (%s)", strings.Join(m.Returns, ", ")))
 	}
 

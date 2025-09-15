@@ -264,6 +264,8 @@ func (p *pkgReaper) exprToString(expr ast.Expr) string {
 			indices = append(indices, p.exprToString(idx))
 		}
 		return fmt.Sprintf("%s[%s]", p.exprToString(e.X), strings.Join(indices, ", "))
+	case *ast.Ellipsis:
+		return "..." + p.exprToString(e.Elt)
 	default:
 		return fmt.Sprintf("%T", expr)
 	}
