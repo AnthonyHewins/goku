@@ -19,6 +19,7 @@ type StructInfoGen struct {
 	target string
 }
 
+// Create a new struct info object capable of creating interfaces
 func NewStructInfoGen(target string) *StructInfoGen {
 	return &StructInfoGen{
 		target:   target,
@@ -26,6 +27,7 @@ func NewStructInfoGen(target string) *StructInfoGen {
 	}
 }
 
+// Type information for a field
 type TypeInfo struct {
 	// if there's a name associated, it appears here
 	// e.g. if this is a method:
@@ -34,7 +36,7 @@ type TypeInfo struct {
 	//
 	// Then Name would be "arg"
 	Name string
-	// Raw ast.Expr the parser saw
+	// Type name
 	Type string
 }
 
@@ -50,6 +52,7 @@ func (t TypeInfo) String() string {
 	return sb.String()
 }
 
+// Information about a method
 type MethodInfo struct {
 	Name         string
 	ReceiverType string
@@ -64,6 +67,7 @@ type pkgReaper struct {
 	usedAliases   map[string]struct{}
 }
 
+// Generate struct info from the generated source files
 func (i *StructInfoGen) StructInfo() (*StructContract, error) {
 	nodes := i.nodes
 

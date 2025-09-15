@@ -25,6 +25,7 @@ func (i *nodelist) AddSrc(src ...string) error {
 	return nil
 }
 
+// Add this file to the parser's node list
 func (i *nodelist) AddFile(filename ...string) error {
 	for _, v := range filename {
 		buf, err := os.ReadFile(v)

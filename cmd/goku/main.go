@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"text/template"
 )
 
 const appName = "goku"
@@ -33,13 +32,22 @@ func (h helpCmd) name() string { return "help" }
 
 func (h helpCmd) usage() string { return "[COMMAND]" }
 
-func (h helpCmd) short() string { return "Help on any command" }
+func (h helpCmd) short() string { return "Get help on any command" }
 
-func (h helpCmd) long() string { return `usage: goku COMMAND` }
+func (h helpCmd) long() string {
+	var sb strings.Builder
+	for i, v := range commands {
+		sb.WriteString(fmt.Sprintf("%s\t\t%s", v.name(), v.short()))
+		if i != len(commands)-1 {
+			sb.WriteRune('\n')
+		}
+	}
+	return sb.String()
+}
 
 func (h helpCmd) run(args argSlice) error {
 	if n := len(args); n == 0 {
-		fmt.Println(h.long())
+		h.printOut(h)
 		return nil
 	} else if n > 1 {
 		return fmt.Errorf("too many args to help")
@@ -48,12 +56,24 @@ func (h helpCmd) run(args argSlice) error {
 	arg := strings.ToLower(args[0])
 	for _, v := range commands {
 		if v.name() == arg {
-			fmt.Println(v.long())
+			h.printOut(v)
 			return nil
 		}
 	}
 
 	return fmt.Errorf("command not found: %s", arg)
+}
+
+func (h helpCmd) printOut(x command) {
+	fmt.Printf(`usage: %s %s %s
+
+%s
+`,
+		appName,
+		x.name(),
+		x.usage(),
+		x.long(),
+	)
 }
 
 type argSlice []string
@@ -72,8 +92,6 @@ func (a *argSlice) shift() string {
 	*a = x[1:]
 	return f
 }
-
-var tmpls *template.Template
 
 func main() {
 	var err error

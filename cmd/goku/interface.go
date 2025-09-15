@@ -13,24 +13,36 @@ type ifaceCmd struct {
 	goku.StructContract
 	dir       string
 	ifaceName string
-	out       string
 }
 
-var iface = &ifaceCmd{
-	dir: ".",
-}
+var iface = &ifaceCmd{dir: "."}
 
 func (i ifaceCmd) name() string { return "iface" }
 
-func (i ifaceCmd) usage() string {
-	return "usage: goku iface STRUCT [FLAGS]"
-}
+func (i ifaceCmd) usage() string { return `STRUCTNAME [FLAGS]` }
 
-func (i ifaceCmd) short() string {
-	return "Generate an interface from a struct's methods"
-}
+func (i ifaceCmd) short() string { return "Generate an interface from a struct" }
 
-func (i ifaceCmd) long() string { return "" }
+func (i ifaceCmd) long() string {
+	return `Generate an interface from a struct's name.
+
+Pass in the name of a struct and the source code will be scanned for all the
+methods in the package in the directory specified (default is current dir, unless
+overrided by -d/--dir). Once the scanning is completed it will output source code
+for the interface that the struct creates.
+
+Flags
+	-h, --help				Display help text for this command
+	-d, --dir STRING			Scan this dir for the struct
+	-m, --mock STRING			Generate a mock implementation also
+	-n, --name STRING			Override the interface name with this name
+						(defaults to STRUCTNAME+"Interface")
+	-p, --pkg STRING			Override the package name. By default, it uses
+						the package of the struct
+	--private				Include private methods
+	-o, --out				Don't generate to stdout
+`
+}
 
 func (i *ifaceCmd) run(args argSlice) error {
 	structName := args.shift()
@@ -67,10 +79,6 @@ func (i *ifaceCmd) run(args argSlice) error {
 			opts = append(opts, goku.OverridePkg(p))
 		case "--private":
 			opts = append(opts, goku.IncludePrivate())
-		case "-o", "--out":
-			if i.out = args.shift(); i.out == "" {
-				return fmt.Errorf("must supply filename to output")
-			}
 		default:
 			return fmt.Errorf("unknown flag/option %s", flag)
 		}
@@ -103,15 +111,5 @@ func (i *ifaceCmd) run(args argSlice) error {
 		return err
 	}
 
-	w := os.Stdout
-	if i.out != "" {
-		f, err := os.Create(filepath.Join(i.dir, i.out))
-		if err != nil {
-			return err
-		}
-		w = f
-		defer f.Close()
-	}
-
-	return s.GenInterface(w, i.ifaceName, opts...)
+	return s.GenInterface(os.Stdout, i.ifaceName, opts...)
 }

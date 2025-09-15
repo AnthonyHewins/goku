@@ -12,8 +12,7 @@ import (
 var files embed.FS
 
 func TestGenInterface(t *testing.T) {
-	stop := 1
-	for i := 0; i < stop; i++ {
+	for i := range 1 {
 		arg, err := files.ReadFile(fmt.Sprintf("testdata/gen_interface/%d-arg.go", i))
 		if err != nil {
 			t.Fatalf("test file unreadable %s", err)
