@@ -18,7 +18,7 @@ func TestGenInterface(t *testing.T) {
 			t.Fatalf("test file unreadable %s", err)
 		}
 
-		want, err := files.ReadFile(fmt.Sprintf("testdata/gen_interface/%d-expected", i))
+		want, err := files.ReadFile(fmt.Sprintf("testdata/gen_interface/%d-expected.txt", i))
 		if err != nil {
 			t.Fatalf("test file unreadable %s", err)
 		}

@@ -2,7 +2,7 @@ package goku
 
 import "golang.org/x/exp/constraints"
 
-//go:generate goku iface Target -m Mock -o 0-expected.go -p override
+//go:generate goku iface Target -m Mock -o 0-expected.txt -p override
 type Target[X any] struct{}
 
 func (x Target[X]) Noop()                       {}

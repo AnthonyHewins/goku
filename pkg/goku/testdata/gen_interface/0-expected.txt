@@ -73,5 +73,5 @@ func (mockImplementation Mock[X]) Import(d constraints.Complex) {
 }
 
 func (mockImplementation Mock[X]) Ellipses(d ...int) {
-	mockImplementation.EllipsesFn(d)
+	mockImplementation.EllipsesFn(d...)
 }

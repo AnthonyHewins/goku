@@ -4,6 +4,10 @@
 
 Golang code generation CLI. Goku helps make go code faster
 
+```shell
+go install github.com/AnthonyHewins/goku/cmd/goku@latest
+```
+
 ## Interface generation
 
 Create interfaces fast from structs. With source code like this:

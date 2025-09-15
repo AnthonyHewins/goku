@@ -118,6 +118,10 @@ func (i *iface) mockMethod(m *MethodInfo) string {
 		sb.WriteString(v.Name)
 		if idx != len(m.Arguments)-1 {
 			sb.WriteString(", ")
+		} else {
+			if strings.HasPrefix(v.Type, "...") {
+				sb.WriteString("...")
+			}
 		}
 	}
 	sb.WriteString(")\n}")
