@@ -40,8 +40,7 @@ Flags
 	-p, --pkg STRING			Override the package name. By default, it uses
 						the package of the struct
 	--private				Include private methods
-	-o, --out				Don't generate to stdout
-`
+	-o, --out				Don't generate to stdout`
 }
 
 func (i *ifaceCmd) run(args argSlice) error {
