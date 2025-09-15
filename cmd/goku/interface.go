@@ -24,23 +24,28 @@ func (i ifaceCmd) usage() string { return `STRUCTNAME [FLAGS]` }
 func (i ifaceCmd) short() string { return "Generate an interface from a struct" }
 
 func (i ifaceCmd) long() string {
-	return `Generate an interface from a struct's name.
+	base := `Generate an interface from a struct's name.
 
 Pass in the name of a struct and the source code will be scanned for all the
 methods in the package in the directory specified (default is current dir, unless
 overrided by -d/--dir). Once the scanning is completed it will output source code
 for the interface that the struct creates.
 
-Flags
-	-h, --help				Display help text for this command
-	-d, --dir STRING			Scan this dir for the struct
-	-m, --mock STRING			Generate a mock implementation also
-	-n, --name STRING			Override the interface name with this name
-						(defaults to STRUCTNAME+"Interface")
-	-p, --pkg STRING			Override the package name. By default, it uses
-						the package of the struct
-	--private				Include private methods
-	-o, --out				Don't generate to stdout`
+Flags`
+
+	for _, v := range [...][2]string{
+		{"-h, --help", "Display help text for this command"},
+		{"-d, --dir STRING", "Scan this dir for the struct"},
+		{"-m, --mock STRING", "Generate a mock implementation also"},
+		{"-n, --name STRING", `Override the interface name with this name (defaults to STRUCTNAME+"Interface`},
+		{"-p, --pkg STRING", "Override the package name. By default, it uses the package of the struct"},
+		{"--private", "Include private methods"},
+		{"-o, --out", "Don't generate to stdout"},
+	} {
+		base += fmt.Sprintf("\n%27s\t%s", bold.Sprint(v[0]), gray.Sprint(v[1]))
+	}
+
+	return base
 }
 
 func (i *ifaceCmd) run(args argSlice) error {

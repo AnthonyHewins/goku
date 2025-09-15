@@ -37,7 +37,7 @@ func (h helpCmd) short() string { return "Get help on any command" }
 func (h helpCmd) long() string {
 	var sb strings.Builder
 	for i, v := range commands {
-		sb.WriteString(fmt.Sprintf("%s\t\t%s", v.name(), v.short()))
+		sb.WriteString(fmt.Sprintf("%s\t\t%s", bold.Sprint(v.name()), gray.Sprint(v.short())))
 		if i != len(commands)-1 {
 			sb.WriteRune('\n')
 		}
@@ -65,12 +65,12 @@ func (h helpCmd) run(args argSlice) error {
 }
 
 func (h helpCmd) printOut(x command) {
-	fmt.Printf(`usage: %s %s %s
+	fmt.Printf(`%s %s %s
 
 %s
 `,
-		appName,
-		x.name(),
+		bold.Sprint("usage: "+appName),
+		cyan.Sprint(x.name()),
 		x.usage(),
 		x.long(),
 	)
