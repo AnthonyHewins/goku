@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"sort"
 	"strings"
 )
 
@@ -129,6 +130,7 @@ func (i *StructInfoGen) StructInfo() (*StructContract, error) {
 		idx++
 	}
 
+	sort.Strings(info.Imports)
 	return info, nil
 }
 

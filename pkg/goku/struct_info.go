@@ -1,7 +1,9 @@
 package goku
 
 import (
+	"bytes"
 	"fmt"
+	"go/format"
 	"io"
 	"strings"
 	"unicode"
@@ -91,7 +93,18 @@ func (s StructContract) GenInterface(w io.Writer, name string, opts ...IfaceOpt)
 		}
 	}
 
-	return tmpls.ExecuteTemplate(w, "iface.go.tmpl", i)
+	var b bytes.Buffer
+	if err := tmpls.ExecuteTemplate(&b, "iface.go.tmpl", i); err != nil {
+		return err
+	}
+
+	formatted, err := format.Source(b.Bytes())
+	if err != nil {
+		return err
+	}
+
+	_, err = w.Write(formatted)
+	return err
 }
 
 func (i *iface) interfaceMethodStr(m *MethodInfo) string {

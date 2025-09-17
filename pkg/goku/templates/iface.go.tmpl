@@ -3,7 +3,8 @@ package {{ .PkgName }}
 {{ if .Imports -}}
 import ({{ range .Imports }}
     "{{ . }}"
-{{ end }})
+{{- end }}
+)
 {{- end }}
 
 // force the underlying to implement the interface

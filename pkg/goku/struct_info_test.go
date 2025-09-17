@@ -45,7 +45,7 @@ func TestGenInterface(t *testing.T) {
 		wanted := strings.Split(strings.TrimSpace(string(want)), "\n")
 
 		if x, y := len(got), len(wanted); x != y {
-			t.Errorf("failed due to line count %d != %d, want\n%s\ngot\n%s", x, y, want, got)
+			t.Errorf("failed due to line count %d != %d, want\n%s\ngot\n%s", x, y, want, strings.Join(got, "\n"))
 			return
 		}
 
