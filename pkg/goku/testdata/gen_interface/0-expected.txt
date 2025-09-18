@@ -2,7 +2,7 @@ package override
 
 import (
 	"context"
-	"sync"
+	synco "sync"
 	"text/template"
 )
 

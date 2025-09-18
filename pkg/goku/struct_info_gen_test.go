@@ -45,7 +45,7 @@ func Test(mainTest *testing.T) {
 					Arguments:    []TypeInfo{},
 					Returns:      []string{},
 				}},
-				Imports: []string{},
+				Imports: []Import{},
 			},
 		},
 		{
@@ -53,7 +53,7 @@ func Test(mainTest *testing.T) {
 			arg:  more,
 			expected: StructContract{
 				PkgName:          "x",
-				Imports:          []string{"text/template"},
+				Imports:          []Import{{"", "text/template"}},
 				StructName:       "X",
 				StructTypeParams: []TypeInfo{},
 				Methods: []MethodInfo{

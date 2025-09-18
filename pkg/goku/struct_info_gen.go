@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"sort"
 	"strings"
 )
 
@@ -64,7 +63,7 @@ type MethodInfo struct {
 
 type pkgReaper struct {
 	target        string
-	importAliases map[string]string
+	importAliases map[string]Import
 	usedAliases   map[string]struct{}
 }
 
@@ -78,14 +77,14 @@ func (i *StructInfoGen) StructInfo() (*StructContract, error) {
 
 	info := &StructContract{
 		PkgName:          i.pkg,
-		Imports:          []string{},
+		Imports:          []Import{},
 		StructName:       i.target,
 		StructTypeParams: []TypeInfo{},
 		Methods:          []MethodInfo{},
 	}
 
 	reaper := pkgReaper{
-		importAliases: map[string]string{},
+		importAliases: map[string]Import{},
 		usedAliases:   map[string]struct{}{},
 		target:        i.target,
 	}
@@ -93,16 +92,18 @@ func (i *StructInfoGen) StructInfo() (*StructContract, error) {
 	for _, node := range nodes {
 		for _, imp := range node.Imports {
 			path := strings.Trim(strings.TrimSpace(imp.Path.Value), `"`)
-			alias := ""
+			key := ""
 
+			i := Import{Path: path}
 			if imp.Name != nil {
-				alias = imp.Name.Name
+				i.Alias = imp.Name.Name
+				key = i.Alias
 			} else {
 				parts := strings.Split(path, "/")
-				alias = parts[len(parts)-1]
+				key = parts[len(parts)-1]
 			}
 
-			reaper.importAliases[alias] = path
+			reaper.importAliases[key] = i
 		}
 
 		if want, got := info.PkgName, node.Name.Name; want != got {
@@ -123,14 +124,13 @@ func (i *StructInfoGen) StructInfo() (*StructContract, error) {
 		}
 	}
 
-	info.Imports = make([]string, len(reaper.usedAliases))
+	info.Imports = make([]Import, len(reaper.usedAliases))
 	idx := 0
 	for k := range reaper.usedAliases {
 		info.Imports[idx] = reaper.importAliases[k]
 		idx++
 	}
 
-	sort.Strings(info.Imports)
 	return info, nil
 }
 

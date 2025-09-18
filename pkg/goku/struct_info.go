@@ -9,9 +9,13 @@ import (
 	"unicode"
 )
 
+type Import struct {
+	Alias, Path string
+}
+
 type StructContract struct {
 	PkgName          string
-	Imports          []string
+	Imports          []Import
 	StructName       string
 	StructTypeParams []TypeInfo
 	Methods          []MethodInfo
@@ -21,7 +25,7 @@ type IfaceOpt func(*iface)
 
 type iface struct {
 	PkgName     string
-	Imports     []string
+	Imports     []Import
 	Original    string
 	Name        string
 	MockName    string
