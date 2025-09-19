@@ -1,0 +1,70 @@
+package goku
+
+import (
+	"context"
+	asloperationsvc "github.com/airspace-link-inc/sauron/gen/go/asloperationsvc/v1"
+	"github.com/airspace-link-inc/sauron/internal/model"
+	"github.com/google/uuid"
+	"github.com/peterstace/simplefeatures/geom"
+	"time"
+)
+
+// force the underlying to implement the interface
+var _ = Interface(&Controller{})
+
+type Interface interface {
+	NewCreateOperation(op model.Operation) *CreateOperation
+	NewDeleteOperation(id uuid.UUID, ownerID string) *DeleteOperation
+	NewGetOperationByPilot(id uuid.UUID, ownerID string) *GetOperation
+	GetAdmin(ctx context.Context, id uuid.UUID) (*asloperationsvc.Operation, error)
+	NewListOperationsByOrg(pilot string, org string, filter FilterParams) *ListOperationsByOrg
+	NewListOperationsForPilot(owner string, filter FilterParams) *ListOperationsByPilot
+	NewQueryOperations(bbox geom.Geometry, startTime time.Time, endTime time.Time, pilot string, organizationIDs []string) *QueryOperations
+	NewUpdateOperation(op model.Operation) *UpdateOperation
+}
+
+// force the mock to implement the interface
+var _ = Interface(MockT{})
+
+type MockT struct {
+	NewCreateOperationFn        func(op model.Operation) *CreateOperation
+	NewDeleteOperationFn        func(id uuid.UUID, ownerID string) *DeleteOperation
+	NewGetOperationByPilotFn    func(id uuid.UUID, ownerID string) *GetOperation
+	GetAdminFn                  func(ctx context.Context, id uuid.UUID) (*asloperationsvc.Operation, error)
+	NewListOperationsByOrgFn    func(pilot string, org string, filter FilterParams) *ListOperationsByOrg
+	NewListOperationsForPilotFn func(owner string, filter FilterParams) *ListOperationsByPilot
+	NewQueryOperationsFn        func(bbox geom.Geometry, startTime time.Time, endTime time.Time, pilot string, organizationIDs []string) *QueryOperations
+	NewUpdateOperationFn        func(op model.Operation) *UpdateOperation
+}
+
+func (mockImplementation MockT) NewCreateOperation(op model.Operation) *CreateOperation {
+	return mockImplementation.NewCreateOperationFn(op)
+}
+
+func (mockImplementation MockT) NewDeleteOperation(id uuid.UUID, ownerID string) *DeleteOperation {
+	return mockImplementation.NewDeleteOperationFn(id, ownerID)
+}
+
+func (mockImplementation MockT) NewGetOperationByPilot(id uuid.UUID, ownerID string) *GetOperation {
+	return mockImplementation.NewGetOperationByPilotFn(id, ownerID)
+}
+
+func (mockImplementation MockT) GetAdmin(ctx context.Context, id uuid.UUID) (*asloperationsvc.Operation, error) {
+	return mockImplementation.GetAdminFn(ctx, id)
+}
+
+func (mockImplementation MockT) NewListOperationsByOrg(pilot string, org string, filter FilterParams) *ListOperationsByOrg {
+	return mockImplementation.NewListOperationsByOrgFn(pilot, org, filter)
+}
+
+func (mockImplementation MockT) NewListOperationsForPilot(owner string, filter FilterParams) *ListOperationsByPilot {
+	return mockImplementation.NewListOperationsForPilotFn(owner, filter)
+}
+
+func (mockImplementation MockT) NewQueryOperations(bbox geom.Geometry, startTime time.Time, endTime time.Time, pilot string, organizationIDs []string) *QueryOperations {
+	return mockImplementation.NewQueryOperationsFn(bbox, startTime, endTime, pilot, organizationIDs)
+}
+
+func (mockImplementation MockT) NewUpdateOperation(op model.Operation) *UpdateOperation {
+	return mockImplementation.NewUpdateOperationFn(op)
+}

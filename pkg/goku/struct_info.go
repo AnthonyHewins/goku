@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
-	"io"
 	"strings"
 	"unicode"
 )
@@ -24,13 +23,12 @@ type StructContract struct {
 type IfaceOpt func(*iface)
 
 type iface struct {
-	PkgName     string
-	Imports     []Import
-	Original    string
-	Name        string
-	MockName    string
-	TypeParams  string
-	TypeAliases string
+	PkgName    string
+	Imports    []Import
+	Original   string
+	Name       string
+	MockName   string
+	TypeParams string
 
 	PrivateMethods []string
 	PublicMethods  []string
@@ -41,7 +39,8 @@ type iface struct {
 	PrivateMockImplementations []string
 	PublicMockImplementations  []string
 
-	genPrivate bool
+	typeAliases string
+	genPrivate  bool
 }
 
 func GenMock(mockName string) IfaceOpt {
@@ -54,7 +53,7 @@ func IncludePrivate() IfaceOpt {
 
 func OverridePkg(s string) IfaceOpt { return func(i *iface) { i.PkgName = s } }
 
-func (s StructContract) GenInterface(w io.Writer, name string, opts ...IfaceOpt) error {
+func (s StructContract) GenInterface(name string, opts ...IfaceOpt) ([]byte, error) {
 	i := iface{Name: name, Imports: s.Imports, PkgName: s.PkgName, Original: s.StructName}
 
 	for _, v := range opts {
@@ -62,22 +61,8 @@ func (s StructContract) GenInterface(w io.Writer, name string, opts ...IfaceOpt)
 	}
 
 	if len(s.StructTypeParams) > 0 {
-		var typeParams strings.Builder
-		var typeAliases strings.Builder
-		typeParams.WriteRune('[')
-		typeAliases.WriteRune('[')
-		for i, v := range s.StructTypeParams {
-			typeParams.WriteString(v.String())
-			typeAliases.WriteString(v.Name)
-			if i != len(s.StructTypeParams)-1 {
-				typeParams.WriteString(", ")
-				typeAliases.WriteString(", ")
-			}
-		}
-		typeParams.WriteRune(']')
-		typeAliases.WriteRune(']')
-		i.TypeParams = typeParams.String()
-		i.TypeAliases = typeAliases.String()
+		i.TypeParams = i.writeTypeParams(&s)
+		i.typeAliases = i.writeTypeAliases(&s)
 	}
 
 	for _, v := range s.Methods {
@@ -99,16 +84,36 @@ func (s StructContract) GenInterface(w io.Writer, name string, opts ...IfaceOpt)
 
 	var b bytes.Buffer
 	if err := tmpls.ExecuteTemplate(&b, "iface.go.tmpl", i); err != nil {
-		return err
+		return nil, err
 	}
 
-	formatted, err := format.Source(b.Bytes())
-	if err != nil {
-		return err
-	}
+	return format.Source(b.Bytes())
+}
 
-	_, err = w.Write(formatted)
-	return err
+func (i *iface) writeTypeParams(s *StructContract) string {
+	var typeParams strings.Builder
+	typeParams.WriteRune('[')
+	for i, v := range s.StructTypeParams {
+		typeParams.WriteString(v.String())
+		if i != len(s.StructTypeParams)-1 {
+			typeParams.WriteString(", ")
+		}
+	}
+	typeParams.WriteRune(']')
+	return typeParams.String()
+}
+
+func (i *iface) writeTypeAliases(s *StructContract) string {
+	var typeAliases strings.Builder
+	typeAliases.WriteRune('[')
+	for i, v := range s.StructTypeParams {
+		typeAliases.WriteString(v.Name)
+		if i != len(s.StructTypeParams)-1 {
+			typeAliases.WriteString(", ")
+		}
+	}
+	typeAliases.WriteRune(']')
+	return typeAliases.String()
 }
 
 func (i *iface) interfaceMethodStr(m *MethodInfo) string {
@@ -121,7 +126,7 @@ func (i *iface) interfaceMethodStr(m *MethodInfo) string {
 
 func (i *iface) mockMethod(m *MethodInfo) string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("func (mockImplementation %s%s) %s", i.MockName, i.TypeAliases, m.Name))
+	sb.WriteString(fmt.Sprintf("func (mockImplementation %s%s) %s", i.MockName, i.typeAliases, m.Name))
 
 	sb.WriteString(i.tuple(m))
 

@@ -120,6 +120,11 @@ func (i *ifaceCmd) run(args argSlice) error {
 		return err
 	}
 
+	source, err := s.GenInterface(i.ifaceName, opts...)
+	if err != nil {
+		return err
+	}
+
 	w := os.Stdout
 	if i.out != "" {
 		f, err := os.Create(i.out)
@@ -130,5 +135,10 @@ func (i *ifaceCmd) run(args argSlice) error {
 		w = f
 	}
 
-	return s.GenInterface(w, i.ifaceName, opts...)
+	if _, err = w.Write([]byte(preamble())); err != nil {
+		return err
+	}
+
+	_, err = w.Write(source)
+	return err
 }

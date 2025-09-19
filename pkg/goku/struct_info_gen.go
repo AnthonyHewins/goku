@@ -127,7 +127,16 @@ func (i *StructInfoGen) StructInfo() (*StructContract, error) {
 	info.Imports = make([]Import, len(reaper.usedAliases))
 	idx := 0
 	for k := range reaper.usedAliases {
-		info.Imports[idx] = reaper.importAliases[k]
+		used := reaper.importAliases[k]
+		if used.Path == "" {
+			return nil, fmt.Errorf("failed resolving package '%s': this package name is used in your source code but it doesn't"+
+				" match any import alias or basename in your import paths. This means that the basename of the import doesn't match the package name"+
+				" (e.g. you're importing 'github.com/user/imported' but when you go to the actual source code for that module, the package name isn't 'package imported' but rather something else like"+
+				" 'package imprted'). An easy fix for this is to give this import in the source code an alias, and code generation will work again",
+				k,
+			)
+		}
+		info.Imports[idx] = used
 		idx++
 	}
 

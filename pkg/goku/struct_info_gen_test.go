@@ -25,11 +25,18 @@ type X[Y any, Z int] struct{}
 func (x X[Y,Z]) L(tt X, r Y) (Y) { var y Y; return y}
 `
 
+const invalidPkgImport = `package x
+import "invalid/pkgname"
+type X struct{}
+func (x *X) D(x different.L) (delta error) {return nil}
+`
+
 func Test(mainTest *testing.T) {
 	testCases := []struct {
-		name     string
-		arg      string
-		expected StructContract
+		name        string
+		arg         string
+		expected    StructContract
+		expectedErr string
 	}{
 		{
 			name: "simple",
@@ -108,6 +115,11 @@ func Test(mainTest *testing.T) {
 				},
 			},
 		},
+		{
+			name:        "correctly finds err in pkg import",
+			arg:         invalidPkgImport,
+			expectedErr: "failed resolving package 'different': this package name is used in your source code but it doesn't match any import alias or basename in your import paths. This means that the basename of the import doesn't match the package name (e.g. you're importing 'github.com/user/imported' but when you go to the actual source code for that module, the package name isn't 'package imported' but rather something else like 'package imprted'). An easy fix for this is to give this import in the source code an alias, and code generation will work again",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -120,7 +132,11 @@ func Test(mainTest *testing.T) {
 
 			got, err := i.StructInfo()
 			if err != nil {
-				tt.Errorf("should not error in test code, got %s", err)
+				if tc.expectedErr == "" {
+					tt.Errorf("should not error in test code, got %s", err)
+				} else if tc.expectedErr != err.Error() {
+					tt.Errorf("wanted %s but got %s", tc.expectedErr, err.Error())
+				}
 				return
 			}
 

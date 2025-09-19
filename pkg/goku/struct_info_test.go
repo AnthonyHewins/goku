@@ -1,7 +1,6 @@
 package goku
 
 import (
-	"bytes"
 	"embed"
 	"fmt"
 	"strings"
@@ -35,13 +34,13 @@ func TestGenInterface(t *testing.T) {
 			continue
 		}
 
-		var b bytes.Buffer
-		if err = x.GenInterface(&b, "TargetInterface", GenMock("Mock"), IncludePrivate(), OverridePkg("override")); err != nil {
+		b, err := x.GenInterface("TargetInterface", GenMock("Mock"), IncludePrivate(), OverridePkg("override"))
+		if err != nil {
 			t.Errorf("should not err on gen interface test %s", err)
 			continue
 		}
 
-		got := strings.Split(strings.TrimSpace(b.String()), "\n")
+		got := strings.Split(strings.TrimSpace(string(b)), "\n")
 		wanted := strings.Split(strings.TrimSpace(string(want)), "\n")
 
 		if x, y := len(got), len(wanted); x != y {
