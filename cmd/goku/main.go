@@ -138,6 +138,6 @@ func preamble() string {
 // Command: %s
 `,
 		version,
-		strings.Join(os.Args, " "),
+		strings.Join(append([]string{appName}, os.Args[1:]...), " "),
 	)
 }
